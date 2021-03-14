@@ -1,0 +1,85 @@
+# Title: POSC-3410 DAL 5 Part II ####
+# Author: Jake Barron
+# Date 03/12/2021
+
+
+# Purpose: To learn how to do chi-square tests on the GSS File.
+
+# set up ####
+# Libaries
+library(tidyverse)
+library(stringer)
+library(infer)
+
+# Data 
+load("DALs/Lecture 13 - Probability IV/data/gss_df.Rdata")
+
+# Theory: Support of science and technology --> Views on space exploration
+
+# Theoretical Null Hypothesis: A person's views on science and technology gives more opportunities to the next generation (nextgen) are NOT related to their views on supporting space exploration (intspace).
+
+# Theoretical Alternative Hypothesis: A person's views on science and technology gives more opportunities to the next generation (nextgen) are related to their views on supporting space exploration (intspace).
+
+# Statistical Tests
+# nextgen = IV = categorical variable, non-interval = 2 independent groups (agree and disagree) <- this will require some work
+
+# intspace = DV = categorical variable, non-interval = 2 or more categories 
+
+# get data in shape for analysis ####
+# what do you think we will have to do to the rows? To the columns?
+
+# Do we want something that looks roughly like this?
+view(frequency_table_df)
+view(chi_sq_df)
+
+# Data Wrangling ####
+analysis_df <- gss_df %>%
+  #filter to keep the rows we want
+  filter(YEAR == 2018 & !is.na(NEXTGEN) &!is.na(INTSPACE) & (NEXTGEN == "Agree" | NEXTGEN == "Strongly agree" | NEXTGEN == "Strongly disagree" | NEXTGEN == "Disagree") & (INTSPACE == "Moderately interested" | INTSPACE == "Very interested" | INTSPACE == "Not at all interested")) %>%
+  # keep only vars we need
+  select(INTSPACE, NEXTGEN, WTSSALL) %>%
+  # Now
+  group_by(NEXTGEN, INTSPACE) %>%
+  summarise(count = sum(WTSSALL))
+
+# convert strongly agree/disagree to agree or disagree, then re-aggregate.
+analysis_df <- analysis_df %>%
+  mutate(NEXTGEN = str_remove_all(NEXTGEN, "Strongly"),
+         NEXTGEN = str_to_lower(NEXTGEN),
+         NEXTGEN = str_trim(NEXTGEN, side = c("both"))) %>%
+  summarise(count = sum(count))
+
+# Reorder factor variable INTSPACE
+analysis_df <- analysis_df %>%
+  mutate(INTSPACE = factor(INTSPACE))
+
+# add Data represented INTSPACE == "Not at all interested"
+add_rows<- tribble(
+  ~NEXTGEN, ~INTSPACE, ~count,
+  "agree", "Not at all interested", 1,
+  "disagree", "Not at all interested", 1
+)
+
+analysis_df <- bind_rows(analysis_df, add_rows)
+
+# Make NEXTGEN and INTSPACE a factor and arrange 
+analysis_df <- analaysis_df %>%
+  mutate(INTSPACE = factor(INTSPACE),
+         NEXTGEN = factor(NEXTGEN)) %>%
+  arrange(NEXTGEN)
+
+# Create Frequency Table by reshaping Data
+frequency_table_df <- analysis_df %>%
+  spread(INTSPACE, count)
+
+# END DAL 5 Part II
+
+
+
+
+
+
+
+
+         
+
