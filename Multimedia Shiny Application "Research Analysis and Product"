@@ -1,0 +1,127 @@
+# Title: Multimedia Application 
+# Author: Jake Barron
+# Author's Email: jibarro@g.clemson.edu
+# Date Created: 2021-04-17
+
+# Purpose:
+
+# Set Up####
+# Libraries
+library(shiny)
+library(tidyverse)
+
+# UI####
+ui <- fluidPage(
+  # Page title 
+  titlePanel("The Analytical Study of Terrorism"),
+  
+  # side bar controls
+  sidebarLayout(
+    # Control panel 
+    sidebarPanel(
+      # Slider input for Year
+      h3("figure 1 controls"),
+      sliderInput("years",
+        "Select Years for Analysis",
+        min = 1970,
+        max = 2018,
+        value=c(1970, 2018),
+        sep=""
+      )
+    ),
+    mainPanel(
+      h1("Analyses"),
+      h3("Terrorist Attacks by Target Type over Time"),
+      plotOutput("time_plot"),
+      p("Purpose: The Purpose of the ShinyApp is to help us understand the determinants of casualty numbers and choice of targets across different types of terrorist attacks.
+"),
+      p("Hypotheses: This study is designed to assess the hypothesis that the location/region is the most influential factor in determining casualty numbers and choice of targets. 
+      Potential Outcomes of Analysis:
+	1. Reject Hypotheses  
+This would determine that a variable other then Location is the most influential factor in determining casualty numbers and choice of targets. 
+	2. Not Reject Hypotheses
+This would result in the variable Location being the most influential factor in determining casualty numbers and choice of targets. 
+	3. Not Enough Data to make a Conclusion
+This result would determine that more information is needed to adequately address the claims made within the hypotheses.  
+
+"),
+      p("Research Design: 
+
+Explanatory Variables: Region/Location of Attack
+
+Explained Variables: Casualty Numbers & Choice of Targets
+
+Control Variables: 
+Attacks endorsed by recognized terror groups
+Population Index of country suffering attack
+Method of Attack
+
+Validity of Observational Time Series:
+Internal Validity: Neutral
+
+External Validity Strong +
+
+Feasibility: Neutral
+
+Data Collection Method: Observational collection of numerical data
+
+Data Summary: Terrorist Attacks from 1970-2019
+	This data set will provide adequate information to determine whether or not the hypothesis is true.  
+
+"),
+      p("Interpretation 
+Hypothesis Status: 
+Based on the results of my statistical analysis, I reject my Null hypothesis with 99% confidence. 
+
+What Does This Result Mean 
+
+
+[Chi-square]
+X and Y are related. X and Y are related. In the instance of a 1 unit change in the x axis there is a %change in the y axis.  This %change will vary depending upon the region.   
+"),
+      p("Analytical Conclusion: Based upon the interpretation of the statistical tests we can conclude that there is a relationship between the location of terrorist attacks and the resulting casualty numbers.  We were able to reject the null hypothesis which stated that, “Location is not the most influential factor in determining casualty numbers and choice of targets” because once we ran our statistical tests the p-value was      < .01.  We failed to reject the alternative hypothesis and can conclude that there is a relationship between the location of terrorist attacks and the casualties produced.  
+"),
+      p("Next Steps in Research Agenda: Through understanding what types of terrorists attacks are most likely to result in the highest number of casualties, national governments can be proactive in preventing such attacks from occurring and limiting the destruction they incur upon their people.   
+
+Countries / Regions that are at high risk for such activity can take steps to deter terrorism within their borders.
+"),
+      p("References:
+      
+      DeAngelis, Tori. “Understanding Terrorism.” Monitor on Psychology, American Psychological Association, Nov. 2009, www.apa.org/monitor/2009/11/terrorism. 
+      
+“Home.” START.umd.edu |, 19 Feb. 2021, www.start.umd.edu/.
+
+LaFree, Gary, and Laura Dugan. “Research on Terrorism and Countering Terrorism.” Crime and Justice, vol. 38, no. 1, 2009, pp. 413–477. JSTOR, www.jstor.org/stable/10.1086/599201. Accessed 22 Feb. 2021.
+
+Pillar, Paul R. “Terrorism Goes Global: Extremist Groups Extend Their Reach Worldwide.” Brookings, Brookings, 28 July 2016, www.brookings.edu/articles/terrorism-goes-global-extremist-groups-extend-their-reach-worldwide/.
+
+Ritchie, Hannah, et al. “Terrorism.” Our World in Data, 28 July 2013, ourworldindata.org/terrorism#public-opinion-on-terrorism. 
+
+Sandler, Todd. “The Analytical Study of Terrorism.” Journal of Peace Research, vol. 51, no. 2, 2013, pp. 257–271., doi:10.1177/0022343313491277. 
+")
+    )
+  )
+  
+)
+
+# Server####
+server<- function(input, output, session) {
+  # Figure 1 Plot - Terrorist Attacks by Target Type over Time 
+  output$time_plot <- renderPlot({
+    #Figure 1 Plot Data Set Up
+    data <- gtd_df %>% 
+      filter(iyear >= input$years[1] & iyear <= input$years[2]) %>% 
+      group_by(iyear, targtype1_txt) %>% 
+      count()
+    #Figure 1 Plot Call
+    data %>% 
+      ggplot(aes(x=iyear, y=n, fill=targtype1_txt)) +
+      geom_bar(stat="identity")
+  })
+}
+
+# App####
+shinyApp(ui=ui, server=server)
+
+
+
